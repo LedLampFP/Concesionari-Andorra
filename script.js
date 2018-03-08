@@ -202,31 +202,21 @@ jQuery(function ($) {
         }
     });
 });
-jQuery(function($) {
+jQuery(window).bind("resize", function () {
+    /*global responsiveDesign */
     'use strict';
-    $('nav.art-nav').addClass("desktop-nav");
-});
-jQuery(function ($) {
-    'use strict';
-    $(window).bind('resize', function() {
-        var pageWidth = $('#art-main').width();
-        var nav = $('nav.art-nav');
-        nav.css('left', (nav.parent().width() - pageWidth) / 2 + 'px').css('width', pageWidth + 'px');
+    if (typeof responsiveDesign !== "undefined" && responsiveDesign.isResponsive)
+        return;
+    var sheetLeft = jQuery(".art-sheet").offset().left;
+    jQuery("header.art-header #art-flash-area").each(function () {
+        var object = jQuery(this);
+        object.css("left", sheetLeft + "px");
     });
 });
 
-jQuery(window).bind('resize', function () {
+jQuery(function($) {
     'use strict';
-    var menu = jQuery("nav.art-nav");
-    var menuOffset = menu.offset();
-    var pageOffset = jQuery('#art-main').offset();
-    if (!menuOffset || !pageOffset) {
-        return;
-    }
-    jQuery("#art-hmenu-bg").css({
-        "height": menu.outerHeight() + "px",
-        "top": (menuOffset.top - pageOffset.top) + "px"
-    });
+    $('nav.art-nav').addClass("desktop-nav");
 });
 
 
@@ -321,22 +311,63 @@ var setHMenuOpenDirection = (function($) {
     });
 })(jQuery);
 
-jQuery(function () {
-    jQuery("ul.art-hmenu ul li").hover(function () { jQuery(this).prev().children("a").addClass("art-hmenu-before-hovered"); }, 
-        function () { jQuery(this).prev().children("a").removeClass("art-hmenu-before-hovered"); });
-});
 
-jQuery(window).bind("resize", function () {
-    /*global responsiveDesign */
+jQuery(window).load(menuExtendedCreate);
+function menuExtendedCreate() {
     'use strict';
-    if (typeof responsiveDesign !== "undefined" && responsiveDesign.isResponsive)
-        return;
-    var sheetLeft = jQuery(".art-sheet").offset().left;
-    jQuery("header.art-header #art-flash-area").each(function () {
-        var object = jQuery(this);
-        object.css("left", sheetLeft + "px");
+    var sheet = jQuery(".art-sheet");
+    var sheetLeft = sheet.offset().left;
+    var sheetWidth = sheet.width();
+
+    jQuery(".art-hmenu>li").each(function(i, v) {
+        var itm = jQuery(this);
+        var subm = itm.children("ul");
+        if (subm.length === 0) {
+            return;
+        }
+
+        // reset
+        itm.removeClass("ext ext-r ext-l");
+        itm.css("width", "").find(".ext-off,.ext-m,.ext-l,.ext-r").remove();
+        subm.children("li").children("a").css("width", "");
+
+        var lw = 0, rw = 0;
+        
+        if (typeof subm.attr("data-ext-l") !== "undefined" && typeof subm.attr("data-ext-r") !== "undefined") {
+            lw = parseInt(subm.attr("data-ext-l"), 10) + 0;
+            rw = parseInt(subm.attr("data-ext-r"), 10) + 0;
+            itm.addClass("ext-r").addClass("ext-l");
+        } else {
+            var ltr = !subm.hasClass("art-hmenu-right-to-left");
+            itm.addClass(ltr ? "ext-r" : "ext-l");
+        }
+
+        var shadow = 0;
+        if (subm.length > 0) {
+            var lnk = itm.children("a");
+            var lnkWidth = lnk.outerWidth();
+            itm.css("width", Math.round(parseFloat(lnkWidth, 10)) + "px");
+            var menubarMargin = 4 * 2; // margin * 2 sides
+            var menubarBorder = 0 * 2; // border 1 side
+            var submWidth = subm.width() + shadow + menubarMargin + menubarBorder;
+            var w = submWidth - lnkWidth;
+            jQuery("<div class=\"ext-m\"></div>").insertBefore(lnk);
+            if (w < 0) {
+                var submA = subm.children("li").children("a");
+                var pL = parseInt(submA.css("padding-left").replace("px", ""), 10) || 0;
+                var pR = parseInt(submA.css("padding-right").replace("px", ""), 10) || 0;
+                var bL = parseInt(submA.css("border-left").replace("px", ""), 10) || 0;
+                var bR = parseInt(submA.css("border-right").replace("px", ""), 10) || 0;
+                subm.children("li").children("a").css("width", (lnkWidth - pL - pR - bL - bR) + "px");
+                submWidth = subm.width() + shadow + menubarMargin + menubarBorder;
+                w = submWidth - lnkWidth;
+            }
+            jQuery("<div class=\"ext-l\" style=\"width: " + (lw > 0 ? lw : Math.round(parseFloat(w, 10))) + "px;\"></div>").insertBefore(lnk);
+            jQuery("<div class=\"ext-r\" style=\"width: " + (rw > 0 ? rw : Math.round(parseFloat(w, 10))) + "px;\"></div>").insertBefore(lnk);
+            itm.addClass("ext");
+        }
     });
-});
+}
 
 jQuery(function ($) {
     'use strict';
@@ -406,6 +437,11 @@ var artButtonSetup = (function ($) {
 jQuery(function () {
     'use strict';
     artButtonSetup("art-button");
+});
+
+jQuery(function($) {
+    'use strict';
+    $('form.art-search>input[type="submit"]').attr('value', '');
 });
 
 var Control = (function ($) {
@@ -1140,6 +1176,6 @@ jQuery(function ($) {
         }
         header.find(".art-shapes").prepend("<div style=\"position:absolute;top:0;left:0;width:100%;height:100%;background:" + bgimage + " " + bgpositions[i] + " no-repeat\">");
     }
-    header.css('background-image', "url('images/header.jpg')".replace(/(url\(['"]?)/i, "$1" + path));
+    header.css('background-image', "url('images/header.png')".replace(/(url\(['"]?)/i, "$1" + path));
     header.css('background-position', "center top");
 });

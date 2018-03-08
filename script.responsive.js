@@ -277,22 +277,15 @@ function responsiveNavFit(responsiveDesign) {
     jQuery(window).trigger("responsiveNav", {isDesktopNav: isDesktopNav, isResponsiveNav: isResponsiveNav});
 }
 
-jQuery(window).bind("responsive", function (event, responsiveDesign) {
-    'use strict';
-    responsiveNav(responsiveDesign);
-});
 
-function responsiveNav(responsiveDesign) {
+
+jQuery(window).bind("responsiveNav", function (event, options) {
+    /*global menuExtendedCreate */
     'use strict';
-    var nav = jQuery("nav.art-nav"), header, headerMarginTop;
-    if (responsiveDesign.isResponsive && nav.parents(".art-header").length > 0) {
-        header = jQuery(".art-header");
-        var otherElement = header.children("*:not(nav.art-nav):first");
-        if (otherElement.length > 0)
-            nav.insertBefore(otherElement);
+    if (options.isDesktopNav && jQuery("li.ext").length > 0) {
+        menuExtendedCreate();
     }
-}
-
+});
 
 jQuery(window).bind("responsive", function (event, responsiveDesign) {
     "use strict";
